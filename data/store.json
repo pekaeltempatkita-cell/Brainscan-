@@ -1,0 +1,143 @@
+{
+  "patients": [
+    {
+      "id": 1,
+      "nik": "3271012304850001",
+      "nama": "Budi Santoso",
+      "tanggal_lahir": "1985-04-23",
+      "jenis_kelamin": "Laki-Laki",
+      "alamat": "Jl. Merdeka No. 45, Jakarta",
+      "no_telepon": "081234567890",
+      "created_at": "2026-09-21 04:25:29",
+      "created_by_email": "dokter.sarah@neurocheck.id"
+    },
+    {
+      "id": 2,
+      "nik": "3271025508920002",
+      "nama": "Siti Rahmawati",
+      "tanggal_lahir": "1992-08-15",
+      "jenis_kelamin": "Perempuan",
+      "alamat": "Jl. Sudirman No. 12, Bandung",
+      "no_telepon": "085678901234",
+      "created_at": "2026-09-23 04:25:29",
+      "created_by_email": "dokter.sarah@neurocheck.id"
+    },
+    {
+      "id": 3,
+      "nik": "3174091212800005",
+      "nama": "Ahmad Fauzi",
+      "tanggal_lahir": "1980-12-12",
+      "jenis_kelamin": "Laki-Laki",
+      "alamat": "Jakarta Selatan",
+      "no_telepon": "0811998877",
+      "created_at": "2026-09-24 04:26:23",
+      "created_by_email": "dokter.sarah@neurocheck.id"
+    }
+  ],
+  "predictions": [
+    {
+      "id": 1,
+      "filename": "brain_mri_budi_axial_t2.jpg",
+      "upload_time": "2026-09-21 04:25:29",
+      "precheck_status": "valid",
+      "precheck_confidence": 0.98,
+      "prediction_label": "Normal_Healthy",
+      "prediction_confidence": 0.942,
+      "all_probabilities": {
+        "Normal_Healthy": 0.942,
+        "Stroke_Iskemik": 0.021,
+        "Alzheimer_Mild": 0.015,
+        "Tumor_Glioma": 0.008,
+        "Tumor_Meningioma": 0.006,
+        "Tumor_Pituitary": 0.003,
+        "Intracranial_Hemorrhage": 0.002,
+        "Multiple_Sclerosis": 0.001,
+        "Alzheimer_Moderate": 0.001,
+        "Alzheimer_Very_Mild": 0.001
+      },
+      "gradcam_path": null,
+      "gemini_explanation": "Apa itu kondisi ini? Hasil skrining AI mengindikasikan 'Normal / Tidak Ditemukan Kelainan Signifikan' dengan tingkat keyakinan 94.2%. Struktur parenkim otak dan ventrikel tampak simetris dalam batas normal.\n\nLangkah selanjutnya: Tidak diperlukan tindak lanjut darurat jika tidak ada gejala neurologis klinis yang dirasakan.\n\nArah solusi/penanganan: Pertahankan gaya hidup sehat, tidur cukup, dan kontrol tekanan darah berkala.\n\nSpesialis yang perlu dikonsultasikan: Dokter Umum / Spesialis Neurologi (Sp.N) bila ada keluhan spesifik.\n\nCatatan: ini hanya alat bantu skrining awal, BUKAN diagnosis final -- hasil wajib dikonfirmasi oleh dokter/radiolog yang berwenang.",
+      "jenis_scan": "MRI",
+      "umur_saat_scan": "41",
+      "gejala": "Pemeriksaan kesehatan rutin"
+    },
+    {
+      "id": 2,
+      "upload_time": "2026-09-24 04:26:25",
+      "filename": "brain_scan_mri.jpg",
+      "precheck_status": "valid",
+      "precheck_confidence": 0.95,
+      "prediction_label": "Normal_Healthy",
+      "prediction_confidence": 0.937,
+      "all_probabilities": {
+        "Alzheimer_Mild": 0.007,
+        "Alzheimer_Moderate": 0.007,
+        "Alzheimer_Very_Mild": 0.007,
+        "Intracranial_Hemorrhage": 0.007,
+        "Multiple_Sclerosis": 0.007,
+        "Normal_Healthy": 0.937,
+        "Stroke_Iskemik": 0.007,
+        "Tumor_Glioma": 0.007,
+        "Tumor_Meningioma": 0.007,
+        "Tumor_Pituitary": 0.007
+      },
+      "gradcam_path": null,
+      "gemini_explanation": "Apa itu kondisi ini? Hasil skrining AI mengindikasikan 'Normal / Tidak Ditemukan Kelainan Signifikan' dengan tingkat keyakinan 93.7%. Gambaran citra tidak menunjukkan kelainan struktural signifikan yang mengarah ke 10 kategori yang dipelajari sistem ini.\n\nLangkah selanjutnya: Tidak diperlukan tindak lanjut segera bila tidak ada gejala klinis yang menyertai. Tetap konsultasikan ke dokter apabila terdapat keluhan neurologis yang dirasakan pasien walau hasil scan tampak normal.\n\nArah solusi/penanganan: Tetap konsultasikan ke dokter apabila terdapat keluhan neurologis yang dirasakan pasien walau hasil scan tampak normal.\n\nSpesialis yang perlu dikonsultasikan: Dokter Umum / Spesialis Neurologi (Sp.N) bila ada keluhan.\n\nCatatan: ini hanya alat bantu skrining awal, BUKAN diagnosis final -- hasil wajib dikonfirmasi oleh dokter/radiolog yang berwenang sebelum dipakai sebagai dasar keputusan medis apapun.",
+      "jenis_scan": "MRI",
+      "umur_saat_scan": "45",
+      "gejala": "Sakit kepala sebelah kiri"
+    },
+    {
+      "id": 3,
+      "upload_time": "2026-09-24 05:47:54",
+      "filename": "sample_mri_glioma.jpg",
+      "precheck_status": "valid",
+      "precheck_confidence": 0.96,
+      "prediction_label": "Tumor_Glioma",
+      "prediction_confidence": 0.903,
+      "all_probabilities": {
+        "Alzheimer_Mild": 0.0108,
+        "Alzheimer_Moderate": 0.0108,
+        "Alzheimer_Very_Mild": 0.0108,
+        "Intracranial_Hemorrhage": 0.0108,
+        "Multiple_Sclerosis": 0.0108,
+        "Normal_Healthy": 0.0108,
+        "Stroke_Iskemik": 0.0108,
+        "Tumor_Glioma": 0.903,
+        "Tumor_Meningioma": 0.0108,
+        "Tumor_Pituitary": 0.0108
+      },
+      "gradcam_path": null,
+      "gemini_explanation": "Apa itu kondisi ini? Hasil skrining AI mengindikasikan 'Tumor Glioma' dengan tingkat keyakinan 90.3%. Gambaran ini mengarah pada kemungkinan tumor primer otak jenis glioma.\n\nLangkah selanjutnya: Rujuk SEGERA ke Spesialis Bedah Saraf (Sp.BS) dan Spesialis Onkologi Radiasi. Pertimbangkan MRI kepala dengan kontras untuk karakterisasi lesi lebih detail.\n\nArah solusi/penanganan: Diskusikan rencana biopsi/reseksi dan tata laksana multidisiplin.\n\nSpesialis yang perlu dikonsultasikan: Spesialis Bedah Saraf (Sp.BS).\n\nCatatan: ini hanya alat bantu skrining awal, BUKAN diagnosis final -- hasil wajib dikonfirmasi oleh dokter/radiolog yang berwenang sebelum dipakai sebagai dasar keputusan medis apapun.",
+      "jenis_scan": "MRI Kontras",
+      "umur_saat_scan": "50",
+      "gejala": "Kejang fokal dan pusing berkala"
+    }
+  ],
+  "records": [
+    {
+      "id": 1,
+      "patient_id": 1,
+      "prediction_id": 1,
+      "catatan_dokter": "Hasil pemeriksaan rutin tidak menunjukkan kelainan akut.",
+      "created_at": "2026-09-21 04:25:29"
+    },
+    {
+      "id": 2,
+      "patient_id": 3,
+      "prediction_id": 2,
+      "catatan_dokter": null,
+      "created_at": "2026-09-24 04:26:25"
+    },
+    {
+      "id": 3,
+      "patient_id": 1,
+      "prediction_id": 3,
+      "catatan_dokter": null,
+      "created_at": "2026-09-24 05:47:54"
+    }
+  ],
+  "nextPatientId": 4,
+  "nextPredictionId": 4,
+  "nextRecordId": 4
+}

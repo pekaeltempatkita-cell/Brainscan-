@@ -1,0 +1,6 @@
+{
+  "name": "NeuroCheck",
+  "description": "Sistem Prediksi Penyakit Otak berbasis AI untuk klasifikasi 10 kondisi neurologis dari citra scan MRI/CT, dilengkapi rekam medis pasien dan laporan klinis.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Detail Pasien - NeuroCheck</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="brand"><span class="logo-dot"></span> NeuroCheck</div>
+        <div class="nav-links">
+            <a href="index.html">Beranda</a>
+            <a href="dashboard.html" class="active">Prediksi</a>
+            <a href="dashboard.html">Riwayat</a>
+            <a href="informasi.html">Informasi</a>
+        </div>
+        <div class="nav-right">
+            <span id="user-email"></span>
+            <a href="#" class="btn btn-outline" onclick="logout(); return false;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container" style="padding:32px 24px 0;">
+        <div class="card" id="patient-info-card">Memuat data pasien...</div>
+        <div id="model-warning" class="alert-warning hidden"></div>
+        <div id="upload-error" class="alert-error hidden"></div>
+        <div id="result-panel-container"></div>
+    </div>
+
+    <div class="page-grid">
+        <div>
+            <div class="card">
+                <div class="card-title-row">
+                    <div class="card-icon-circle">&#9729;</div>
+                    <h2 style="margin:0;">Unggah Hasil Scan Otak</h2>
+                </div>
+                <p style="color:var(--text-muted); margin-top:0;">Unggah file gambar MRI atau CT dalam format JPG/PNG.</p>
+
+                <form id="upload-form">
+                    <div class="dropzone" data-dropzone>
+                        <div class="dz-icon">&#9729;&#8593;</div>
+                        <div><strong>Seret dan lepas file di sini</strong></div>
+                        <div style="color:var(--text-muted); font-size:0.85rem; margin:6px 0;">atau</div>
+                        <span class="btn btn-primary btn-sm">Pilih File</span>
+                        <input type="file" name="file" id="f-file" accept="image/*" required style="display:none;">
+                        <div class="dz-filename" data-filename style="display:none;"></div>
+                        <div class="dz-hint">Format: JPG, PNG &nbsp;|&nbsp; Maks. ukuran 10 MB</div>
+                    </div>
+
+                    <div style="margin-top:24px;">
+                        <div class="card-title-row">
+                            <div class="card-icon-circle" style="font-size:0.95rem;">&#128100;</div>
+                            <h3 style="margin:0;">Informasi Tambahan</h3>
+                        </div>
+                        <div class="form-row-3">
+                            <div class="form-group">
+                                <label>Jenis Scan</label>
+                                <select id="f-jenis-scan">
+                                    <option value="">Pilih jenis scan</option>
+                                    <option value="MRI">MRI</option>
+                                    <option value="CT-Scan">CT-Scan</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Umur Saat Scan</label>
+                                <input type="number" id="f-umur" placeholder="Contoh: 45" min="0" max="130">
+                            </div>
+                            <div class="form-group">
+                                <label>Gejala (opsional)</label>
+                                <input type="text" id="f-gejala" placeholder="Contoh: sakit kepala">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="upload-btn" style="width:100%; margin-top:8px;">
+                        &#128269; Mulai Prediksi
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Rekam Medis / Riwayat Pemeriksaan</h2>
+                <table class="styled" id="history-table">
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Hasil</th>
+                        <th>Confidence</th>
+                        <th>Laporan</th>
+                    </tr>
+                    <tr>
+                        <td colspan="4">Memuat...</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <div class="sidebar-card">
+                <div class="card-title-row">
+                    <div class="card-icon-circle">&#129504;</div>
+                    <h3 style="margin:0;">10 Kelas Penyakit Otak</h3>
+                </div>
+                <div class="class-list">
+                    <div class="class-item"><span class="class-badge" style="background:#3b82f6">1</span> Alzheimer Mild</div>
+                    <div class="class-item"><span class="class-badge" style="background:#8b5cf6">2</span> Alzheimer Moderate</div>
+                    <div class="class-item"><span class="class-badge" style="background:#14b8a6">3</span> Alzheimer Very Mild</div>
+                    <div class="class-item"><span class="class-badge" style="background:#f59e0b">4</span> Intracranial Hemorrhage</div>
+                    <div class="class-item"><span class="class-badge" style="background:#ec4899">5</span> Multiple Sclerosis</div>
+                    <div class="class-item"><span class="class-badge" style="background:#10b981">6</span> Normal / Sehat</div>
+                    <div class="class-item"><span class="class-badge" style="background:#f97316">7</span> Stroke Iskemik</div>
+                    <div class="class-item"><span class="class-badge" style="background:#ef4444">8</span> Tumor Glioma</div>
+                    <div class="class-item"><span class="class-badge" style="background:#db2777">9</span> Tumor Meningioma</div>
+                    <div class="class-item"><span class="class-badge" style="background:#64748b">10</span> Tumor Pituitary</div>
+                </div>
+            </div>
+            <div class="alert-info">Pastikan file scan yang diunggah berkualitas baik agar hasil prediksi lebih akurat.</div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 NeuroCheck. All rights reserved.</div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        requireUserLogin();
+        document.getElementById("user-email").textContent = getUser().email || "";
+
+        const params = new URLSearchParams(window.location.search);
+        const nik = params.get("nik");
+        if (!nik) window.location.href = "dashboard.html";
+
+        function reportUrl(predictionId) {
+            // Link diklik langsung oleh browser -> gak bisa nyisipin header,
+            // jadi token dikirim lewat query string (?token=...), lihat auth.py.
+            return `${API_BASE_URL}/api/patients/${encodeURIComponent(nik)}/report/${predictionId}?token=${encodeURIComponent(getToken())}`;
+        }
+
+        function renderPatientInfo(p) {
+            document.getElementById("patient-info-card").innerHTML = `
+                <h2 style="margin-bottom:4px;">${p.nama}</h2>
+                <p style="color:var(--text-muted); margin:0 0 4px;">NIK: ${p.nik} &nbsp;|&nbsp; Tgl Lahir: ${p.tanggal_lahir || "-"} &nbsp;|&nbsp; ${p.jenis_kelamin || "-"}</p>
+                <p style="color:var(--text-muted); margin:0;">Alamat: ${p.alamat || "-"} &nbsp;|&nbsp; Telp: ${p.no_telepon || "-"}</p>
+            `;
+        }
+
+        function renderHistory(records) {
+            const table = document.getElementById("history-table");
+            if (!records.length) {
+                table.innerHTML = `<tr><th>Tanggal</th><th>Hasil</th><th>Confidence</th><th>Laporan</th></tr>
+                    <tr><td colspan="4">Belum ada riwayat pemeriksaan.</td></tr>`;
+                return;
+            }
+            let rows = `<tr><th>Tanggal</th><th>Hasil</th><th>Confidence</th><th>Laporan</th></tr>`;
+            records.forEach((r) => {
+                const conf = r.prediction_confidence ? (r.prediction_confidence * 100).toFixed(1) + "%" : "-";
+                const laporan = r.prediction_id
+                    ? `<a href="${reportUrl(r.prediction_id)}" target="_blank">Unduh PDF</a>` : "-";
+                rows += `<tr>
+                    <td>${r.created_at}</td>
+                    <td>${r.prediction_label || "Bukan citra otak"}</td>
+                    <td>${conf}</td>
+                    <td>${laporan}</td>
+                </tr>`;
+            });
+            table.innerHTML = rows;
+        }
+
+        function urgencyClass(urgensi) {
+            if (urgensi.includes("TINGGI")) return "urgency-tinggi";
+            if (urgensi.includes("Sedang")) return "urgency-sedang";
+            return "urgency-rutin";
+        }
+
+        function renderResult(data) {
+            const container = document.getElementById("result-panel-container");
+            if (data.precheck_status === "invalid") {
+                const confVal = typeof data.precheck_confidence === "number" && !isNaN(data.precheck_confidence)
+                    ? (data.precheck_confidence * 100).toFixed(1) + "%"
+                    : "rendah";
+                container.innerHTML = `<div class="alert-error">
+                    Gambar terdeteksi <strong>BUKAN citra MRI/CT otak</strong>
+                    (confidence deteksi otak: ${confVal}).
+                    Coba unggah ulang gambar MRI/CT otak yang lebih jelas.
+                </div>`;
+                return;
+            }
+            const info = data.info;
+            container.innerHTML = `
+                <div class="result-panel">
+                    <div class="result-header">
+                        <div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); font-weight:700; letter-spacing:0.5px;">HASIL ANALISIS AI</div>
+                            <div class="result-label">${info.nama_tampilan}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <span class="urgency-badge ${urgencyClass(info.urgensi)}">${info.urgensi}</span>
+                            <div style="margin-top:8px;">
+                                <a href="${reportUrl(data.prediction_id)}" target="_blank" class="btn btn-primary btn-sm">&#8659; Unduh Laporan (PDF)</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-muted);">
+                            <span>Tingkat Keyakinan</span><span><strong>${(data.prediction_confidence * 100).toFixed(2)}%</strong></span>
+                        </div>
+                        <div class="confidence-bar-track">
+                            <div class="confidence-bar-fill" style="width:${data.prediction_confidence * 100}%;"></div>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                        <div class="result-section">
+                            <h4>Ringkasan Temuan</h4>
+                            <ul>${info.temuan.map((t) => `<li>${t}</li>`).join("")}</ul>
+                        </div>
+                        <div class="result-section">
+                            <h4>Rekomendasi</h4>
+                            <ul>${info.rekomendasi.map((r) => `<li>${r}</li>`).join("")}</ul>
+                        </div>
+                    </div>
+                    ${data.gemini_explanation ? `
+                    <div class="result-section">
+                        <h4>Penjelasan &amp; Langkah Selanjutnya</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem; white-space:pre-line; line-height:1.7;">${escapeHtml(data.gemini_explanation)}</p>
+                    </div>` : ""}
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin-top:16px; margin-bottom:0;">
+                        Hasil ini adalah opini AI sebagai alat bantu skrining awal, BUKAN diagnosis final.
+                        Wajib dikonfirmasi oleh dokter/radiolog yang berwenang.
+                    </p>
+                </div>`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        }
+
+        async function loadPatient() {
+            try {
+                const data = await apiGet(`/api/patients/${encodeURIComponent(nik)}`);
+                renderPatientInfo(data.patient);
+                renderHistory(data.records);
+                if (data.model_warning) {
+                    const el = document.getElementById("model-warning");
+                    el.textContent = "⚠ Model AI belum siap: " + data.model_warning;
+                    el.classList.remove("hidden");
+                }
+            } catch (e) {
+                document.getElementById("patient-info-card").innerHTML =
+                    `<p style="color:#b3261e;">Gagal memuat data pasien: ${e.message}</p>`;
+            }
+        }
+
+        // --- Dropzone drag & drop ---
+        const dropzone = document.querySelector("[data-dropzone]");
+        const fileInput = document.getElementById("f-file");
+        const filenameEl = dropzone.querySelector("[data-filename]");
+        dropzone.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", () => {
+            if (fileInput.files[0]) {
+                filenameEl.textContent = "File dipilih: " + fileInput.files[0].name;
+                filenameEl.style.display = "block";
+            }
+        });
+        ["dragenter", "dragover"].forEach((evt) =>
+            dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add("dragover"); }));
+        ["dragleave", "drop"].forEach((evt) =>
+            dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove("dragover"); }));
+        dropzone.addEventListener("drop", (e) => {
+            if (e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                filenameEl.textContent = "File dipilih: " + e.dataTransfer.files[0].name;
+                filenameEl.style.display = "block";
+            }
+        });
+
+        // --- Submit upload ---
+        document.getElementById("upload-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const errorEl = document.getElementById("upload-error");
+            errorEl.classList.add("hidden");
+            if (!fileInput.files[0]) return;
+
+            const btn = document.getElementById("upload-btn");
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Menganalisis...`;
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("jenis_scan", document.getElementById("f-jenis-scan").value);
+            formData.append("umur_saat_scan", document.getElementById("f-umur").value);
+            formData.append("gejala", document.getElementById("f-gejala").value);
+
+            try {
+                const result = await apiUpload(`/api/patients/${encodeURIComponent(nik)}/upload`, formData);
+                renderResult(result);
+                const data = await apiGet(`/api/patients/${encodeURIComponent(nik)}`);
+                renderHistory(data.records);
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove("hidden");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "&#128269; Mulai Prediksi";
+            }
+        });
+
+        loadPatient();
+    </script>
+</body>
+
+</html>

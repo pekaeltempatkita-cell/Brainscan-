@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Informasi - NeuroCheck</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="brand"><span class="logo-dot"></span> NeuroCheck</div>
+        <div class="nav-links">
+            <a href="index.html">Beranda</a>
+            <a href="dashboard.html">Prediksi</a>
+            <a href="dashboard.html">Riwayat</a>
+            <a href="informasi.html" class="active">Informasi</a>
+        </div>
+        <div class="nav-right" id="nav-right-area"></div>
+    </nav>
+
+    <div class="container" style="padding:32px 24px 60px; max-width:800px;">
+        <div class="card">
+            <h2>Tentang NeuroCheck</h2>
+            <p style="color:var(--text-muted); line-height:1.8;">
+                NeuroCheck adalah sistem bantu skrining berbasis AI untuk mengklasifikasikan hasil citra MRI/CT otak
+                ke dalam 10 kategori kondisi. Sistem menggunakan model hybrid (EfficientNet-B3 + Vision Transformer)
+                sebagai model utama, dijalankan lewat ONNX Runtime.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Alur Penggunaan</h2>
+            <ol style="color:var(--text-muted); line-height:2;">
+                <li>Masuk dengan akun Google.</li>
+                <li>Daftarkan atau cari data pasien di halaman Riwayat.</li>
+                <li>Buka halaman pasien, unggah hasil scan otak (+ info tambahan: jenis scan, umur, gejala).</li>
+                <li>Sistem menjalankan precheck (apakah ini citra otak?), lalu klasifikasi 10 kelas penyakit.</li>
+                <li>Hasil analisis + penjelasan + laporan PDF otomatis tersimpan di rekam medis pasien.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>10 Kelas yang Dikenali Sistem</h2>
+            <div class="class-list" id="class-list">Memuat...</div>
+        </div>
+
+        <div class="alert-warning">
+            <strong>Penting:</strong> NeuroCheck adalah alat bantu skrining awal (decision support tool), BUKAN
+            pengganti diagnosis dokter. Seluruh hasil wajib dikonfirmasi oleh dokter/radiolog yang berwenang sebelum
+            dipakai sebagai dasar tindakan medis.
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 NeuroCheck. All rights reserved.</div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        if (isLoggedIn()) {
+            document.getElementById("nav-right-area").innerHTML =
+                `<span>${getUser().email || ""}</span> <a href="#" class="btn btn-outline" onclick="logout(); return false;">Logout</a>`;
+        } else {
+            document.getElementById("nav-right-area").innerHTML =
+                `<a href="index.html" class="btn btn-primary">Masuk</a>`;
+        }
+
+        const COLORS = ["#3b82f6", "#8b5cf6", "#14b8a6", "#f59e0b", "#ec4899", "#10b981", "#f97316", "#ef4444", "#db2777", "#64748b"];
+
+        async function loadClasses() {
+            const el = document.getElementById("class-list");
+            try {
+                const info = await apiGet("/api/disease-info");
+                const labels = Object.keys(info);
+                el.innerHTML = labels.map((label, i) => `
+                    <div class="class-item">
+                        <span class="class-badge" style="background:${COLORS[i % COLORS.length]}">${i + 1}</span>
+                        ${info[label].nama_tampilan}
+                    </div>
+                `).join("");
+            } catch (e) {
+                el.textContent = "Gagal memuat daftar kelas: " + e.message;
+            }
+        }
+        loadClasses();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,15 @@
+node_modules
+checkpoints
+models_cache
+onnx_models
+outputs/checkpoints
+outputs/reports
+*.onnx
+*.pth
+*.bin
+*.tar.gz
+.git
+.env
+data/*.db
+data/store.json
+temp_uploads

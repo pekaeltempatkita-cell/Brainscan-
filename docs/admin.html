@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - NeuroCheck</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="brand"><span class="logo-dot"></span> NeuroCheck <span
+                style="font-weight:400;color:var(--text-muted);font-size:0.9rem;">| Panel Admin</span></div>
+        <div class="nav-right" id="nav-right-area"></div>
+    </nav>
+
+    <div id="login-view" class="login-gate card hidden">
+        <h2>Login Admin</h2>
+        <p>Masuk dengan username &amp; password admin.</p>
+        <form id="admin-login-form">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="a-username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="a-password" required>
+            </div>
+            <div id="admin-login-error" class="alert-error hidden"></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Masuk</button>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:12px; text-align:center;">Kredensial default: <code>admin</code> / <code>admin123</code></p>
+        </form>
+    </div>
+
+    <div id="dashboard-view" class="container hidden" style="padding:32px 24px;">
+        <div id="model-warning" class="alert-warning hidden"></div>
+
+        <div class="card">
+            <h2>Ringkasan</h2>
+            <p style="color:var(--text-muted);">Total pasien terdaftar: <strong id="total-patients">-</strong> |
+                Total pemeriksaan: <strong id="total-records">-</strong></p>
+        </div>
+
+        <div class="card">
+            <h2>History Pemeriksaan Semua Pasien</h2>
+            <table class="styled" id="records-table">
+                <tr><th>Tanggal</th><th>NIK</th><th>Nama Pasien</th><th>Hasil</th><th>Confidence</th><th>Laporan</th></tr>
+                <tr><td colspan="6">Memuat...</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Semua Pasien Terdaftar</h2>
+            <table class="styled" id="patients-table">
+                <tr><th>NIK</th><th>Nama</th><th>Tgl Lahir</th><th>Didaftarkan Oleh</th></tr>
+                <tr><td colspan="4">Memuat...</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 NeuroCheck. All rights reserved.</div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function reportUrl(nik, predictionId) {
+            return `${API_BASE_URL}/api/patients/${encodeURIComponent(nik)}/report/${predictionId}?token=${encodeURIComponent(getToken())}`;
+        }
+
+        function showDashboard() {
+            document.getElementById("login-view").classList.add("hidden");
+            document.getElementById("dashboard-view").classList.remove("hidden");
+            document.getElementById("nav-right-area").innerHTML =
+                `<a href="#" class="btn btn-outline" onclick="logout(); return false;">Logout</a>`;
+            loadOverview();
+        }
+
+        function showLogin() {
+            document.getElementById("dashboard-view").classList.add("hidden");
+            document.getElementById("login-view").classList.remove("hidden");
+            document.getElementById("nav-right-area").innerHTML = "";
+        }
+
+        async function loadOverview() {
+            try {
+                const data = await apiGet("/api/admin/overview");
+                document.getElementById("total-patients").textContent = data.patients.length;
+                document.getElementById("total-records").textContent = data.records.length;
+
+                if (data.model_warning) {
+                    const el = document.getElementById("model-warning");
+                    el.textContent = "⚠ Model AI belum siap: " + data.model_warning;
+                    el.classList.remove("hidden");
+                }
+
+                let recRows = `<tr><th>Tanggal</th><th>NIK</th><th>Nama Pasien</th><th>Hasil</th><th>Confidence</th><th>Laporan</th></tr>`;
+                if (!data.records.length) {
+                    recRows += `<tr><td colspan="6">Belum ada data pemeriksaan.</td></tr>`;
+                } else {
+                    data.records.forEach((r) => {
+                        const conf = r.prediction_confidence ? (r.prediction_confidence * 100).toFixed(1) + "%" : "-";
+                        const laporan = r.prediction_id
+                            ? `<a href="${reportUrl(r.nik, r.prediction_id)}" target="_blank">Unduh PDF</a>` : "-";
+                        recRows += `<tr><td>${r.created_at}</td><td>${r.nik}</td><td>${r.nama_pasien}</td>
+                            <td>${r.prediction_label || "-"}</td><td>${conf}</td><td>${laporan}</td></tr>`;
+                    });
+                }
+                document.getElementById("records-table").innerHTML = recRows;
+
+                let patRows = `<tr><th>NIK</th><th>Nama</th><th>Tgl Lahir</th><th>Didaftarkan Oleh</th></tr>`;
+                if (!data.patients.length) {
+                    patRows += `<tr><td colspan="4">Belum ada pasien terdaftar.</td></tr>`;
+                } else {
+                    data.patients.forEach((p) => {
+                        patRows += `<tr><td>${p.nik}</td><td>${p.nama}</td><td>${p.tanggal_lahir || "-"}</td>
+                            <td>${p.created_by_email || "-"}</td></tr>`;
+                    });
+                }
+                document.getElementById("patients-table").innerHTML = patRows;
+            } catch (e) {
+                if (e.message && e.message.toLowerCase().includes("token")) {
+                    logout();
+                }
+            }
+        }
+
+        document.getElementById("admin-login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const errorEl = document.getElementById("admin-login-error");
+            errorEl.classList.add("hidden");
+            try {
+                const result = await apiPostJSON("/api/auth/admin/login", {
+                    username: document.getElementById("a-username").value,
+                    password: document.getElementById("a-password").value,
+                });
+                saveSession(result.token, { username: document.getElementById("a-username").value }, "admin");
+                showDashboard();
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove("hidden");
+            }
+        });
+
+        if (requireAdminLogin()) {
+            showDashboard();
+        } else {
+            showLogin();
+        }
+    </script>
+</body>
+
+</html>

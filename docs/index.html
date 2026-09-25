@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroCheck - Sistem Prediksi Penyakit Otak</title>
+    <meta name="description" content="Sistem Prediksi Penyakit Otak berbasis AI untuk klasifikasi 10 kondisi neurologis dari citra scan MRI/CT, dilengkapi rekam medis pasien dan laporan klinis.">
+    <meta property="og:title" content="NeuroCheck - Sistem Prediksi Penyakit Otak">
+    <meta property="og:description" content="Sistem Prediksi Penyakit Otak berbasis AI untuk klasifikasi 10 kondisi neurologis dari citra scan MRI/CT, dilengkapi rekam medis pasien dan laporan klinis.">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="brand"><span class="logo-dot"></span> NeuroCheck</div>
+        <div class="nav-links">
+            <a href="index.html" class="active">Beranda</a>
+            <a href="informasi.html">Informasi</a>
+        </div>
+        <div class="nav-right">
+            <a href="admin.html" class="btn btn-outline">Login Admin</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-text">
+                <div class="eyebrow">SISTEM PREDIKSI PENYAKIT OTAK</div>
+                <h1>Deteksi Dini, Lindungi<br>Kesehatan Otak Anda</h1>
+                <p>Masuk untuk mendaftarkan pasien, unggah hasil scan otak (MRI/CT), dan dapatkan prediksi 10 jenis
+                    penyakit otak dengan cepat dan akurat.</p>
+
+                <div id="logged-out-view">
+                    <div id="g_id_signin_container"></div>
+                    <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
+                        <button type="button" class="btn btn-primary" onclick="loginAsDemoUser()">Masuk Mode Dokter Demo &rarr;</button>
+                    </div>
+                    <p id="login-status" style="color:var(--text-muted); font-size:0.85rem; margin-top:10px;"></p>
+                </div>
+                <div id="logged-in-view" class="hidden">
+                    <a href="dashboard.html" class="btn btn-primary">Ke Dashboard &rarr;</a>
+                </div>
+            </div>
+            <div class="hero-image-wrap">
+                <img src="assets/background.png" alt="Ilustrasi brain scan NeuroCheck"
+                    onerror="this.style.display='none'">
+            </div>
+        </div>
+    </section>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Cara Kerja</h2>
+            <ol style="color:var(--text-muted); line-height:2;">
+                <li>Masuk dengan akun Google Anda</li>
+                <li>Daftarkan atau cari data pasien</li>
+                <li>Unggah hasil scan otak pasien</li>
+                <li>Dapatkan hasil klasifikasi + penjelasan medis</li>
+                <li>Hasil otomatis tersimpan di rekam medis pasien</li>
+            </ol>
+        </div>
+        <div class="card">
+            <h2>10 Kelas Penyakit Otak</h2>
+            <div class="class-list">
+                <div class="class-item"><span class="class-badge" style="background:#3b82f6">1</span> Alzheimer Mild</div>
+                <div class="class-item"><span class="class-badge" style="background:#8b5cf6">2</span> Alzheimer Moderate</div>
+                <div class="class-item"><span class="class-badge" style="background:#14b8a6">3</span> Alzheimer Very Mild</div>
+                <div class="class-item"><span class="class-badge" style="background:#f59e0b">4</span> Intracranial Hemorrhage</div>
+                <div class="class-item"><span class="class-badge" style="background:#ec4899">5</span> Multiple Sclerosis</div>
+                <div class="class-item"><span class="class-badge" style="background:#10b981">6</span> Normal / Sehat</div>
+                <div class="class-item"><span class="class-badge" style="background:#f97316">7</span> Stroke Iskemik</div>
+                <div class="class-item"><span class="class-badge" style="background:#ef4444">8</span> Tumor Glioma</div>
+                <div class="class-item"><span class="class-badge" style="background:#db2777">9</span> Tumor Meningioma</div>
+                <div class="class-item"><span class="class-badge" style="background:#64748b">10</span> Tumor Pituitary</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 NeuroCheck. All rights reserved.</div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Kalau sudah login sebelumnya (token masih ada di localStorage), langsung
+        // tampilkan tombol "Ke Dashboard" -- gak perlu login Google lagi tiap buka halaman.
+        if (isLoggedIn() && getRole() === "user") {
+            document.getElementById("logged-out-view").classList.add("hidden");
+            document.getElementById("logged-in-view").classList.remove("hidden");
+        } else {
+            window.onload = function () {
+                if (typeof GOOGLE_CLIENT_ID !== "undefined" && GOOGLE_CLIENT_ID && typeof google !== "undefined" && google.accounts) {
+                    try {
+                        google.accounts.id.initialize({
+                            client_id: GOOGLE_CLIENT_ID,
+                            callback: handleGoogleCredentialResponse,
+                        });
+                        google.accounts.id.renderButton(
+                            document.getElementById("g_id_signin_container"),
+                            { theme: "filled_blue", size: "large", text: "signin_with" }
+                        );
+                    } catch (e) {
+                        console.warn("GIS init note:", e);
+                    }
+                }
+            };
+        }
+
+        async function loginAsDemoUser() {
+            const statusEl = document.getElementById("login-status");
+            try {
+                if (statusEl) statusEl.textContent = "Memproses login dokter demo...";
+                const result = await apiPostJSON("/api/auth/demo", {});
+                saveSession(result.token, result.user, "user");
+                window.location.href = "dashboard.html";
+            } catch (err) {
+                if (statusEl) statusEl.textContent = "Login gagal: " + err.message;
+            }
+        }
+    </script>
+</body>
+
+</html>

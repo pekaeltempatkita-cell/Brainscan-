@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+dist/
+node_modules/
+
+# Ignore all model files and caches to avoid exhausting storage & quota
+*.onnx
+*.pth
+*.bin
+checkpoints/
+models_cache/
+onnx_models/
+outputs/checkpoints/
+outputs/reports/*.pdf
+outputs/figures/*.png
+
+data/*.db
+temp_uploads/

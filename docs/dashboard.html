@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Riwayat Pasien - NeuroCheck</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="brand"><span class="logo-dot"></span> NeuroCheck</div>
+        <div class="nav-links">
+            <a href="index.html">Beranda</a>
+            <a href="dashboard.html" class="active">Prediksi</a>
+            <a href="dashboard.html">Riwayat</a>
+            <a href="informasi.html">Informasi</a>
+        </div>
+        <div class="nav-right">
+            <span id="user-email"></span>
+            <a href="#" class="btn btn-outline" onclick="logout(); return false;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container" style="padding:32px 24px;">
+        <div id="model-warning" class="alert-warning hidden"></div>
+        <div id="form-error" class="alert-error hidden"></div>
+
+        <div class="card">
+            <h2>Daftarkan Pasien Baru</h2>
+            <form id="register-form">
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>NIK</label>
+                        <input type="text" id="f-nik" required maxlength="32">
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="f-nama" required>
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Tanggal Lahir</label>
+                        <input type="date" id="f-tgl-lahir" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis Kelamin</label>
+                        <select id="f-jk" required>
+                            <option value="">Pilih jenis kelamin</option>
+                            <option value="Laki-Laki">Laki-Laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Alamat (opsional)</label>
+                        <input type="text" id="f-alamat">
+                    </div>
+                    <div class="form-group">
+                        <label>No. Telepon (opsional)</label>
+                        <input type="text" id="f-telepon">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="submit-btn">Daftarkan &amp; Buka Halaman Pasien</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Daftar Pasien</h2>
+            <div id="patient-list">Memuat...</div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 NeuroCheck. All rights reserved.</div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        requireUserLogin();
+        document.getElementById("user-email").textContent = getUser().email || "";
+
+        function showError(msg) {
+            const el = document.getElementById("form-error");
+            el.textContent = msg;
+            el.classList.remove("hidden");
+        }
+
+        async function loadStatus() {
+            try {
+                const status = await apiGet("/api/status");
+                if (status.model_warning) {
+                    const el = document.getElementById("model-warning");
+                    el.textContent = "⚠ Model AI belum siap: " + status.model_warning;
+                    el.classList.remove("hidden");
+                }
+            } catch (e) { /* diamkan -- gak kritikal buat halaman ini */ }
+        }
+
+        async function loadPatients() {
+            const listEl = document.getElementById("patient-list");
+            try {
+                const data = await apiGet("/api/patients");
+                if (!data.patients.length) {
+                    listEl.textContent = "Belum ada pasien terdaftar.";
+                    return;
+                }
+                listEl.innerHTML = "";
+                data.patients.forEach((p) => {
+                    const row = document.createElement("div");
+                    row.className = "patient-list-item";
+                    row.innerHTML = `
+                        <div>
+                            <strong>${p.nama}</strong><br>
+                            <span class="meta">NIK: ${p.nik} &bull; ${p.jenis_kelamin || "-"}</span>
+                        </div>
+                        <a class="btn btn-outline btn-sm" href="patient.html?nik=${encodeURIComponent(p.nik)}">Buka</a>
+                    `;
+                    listEl.appendChild(row);
+                });
+            } catch (e) {
+                listEl.textContent = "Gagal memuat daftar pasien: " + e.message;
+            }
+        }
+
+        document.getElementById("register-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            document.getElementById("form-error").classList.add("hidden");
+            const nik = document.getElementById("f-nik").value.trim();
+            const submitBtn = document.getElementById("submit-btn");
+            submitBtn.disabled = true;
+            try {
+                await apiPostJSON("/api/patients", {
+                    nik,
+                    nama: document.getElementById("f-nama").value.trim(),
+                    tanggal_lahir: document.getElementById("f-tgl-lahir").value,
+                    jenis_kelamin: document.getElementById("f-jk").value,
+                    alamat: document.getElementById("f-alamat").value.trim(),
+                    no_telepon: document.getElementById("f-telepon").value.trim(),
+                });
+                window.location.href = "patient.html?nik=" + encodeURIComponent(nik);
+            } catch (err) {
+                showError(err.message);
+                submitBtn.disabled = false;
+            }
+        });
+
+        loadStatus();
+        loadPatients();
+    </script>
+</body>
+
+</html>
